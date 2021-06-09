@@ -121,13 +121,15 @@ upload_image() {
     fi
 
     notify ok "ocss: Upload done!" "$img_url"
+    
+# Comment out below to get rid of bad substitution error. Don't need it anyway afaik
 
-    if [ ! -z "$open_command" ]; then
-      open_command=${open_command/\%img/$1}
-      open_command=${open_command/\%url/$img_url}
-      echo "Opening '$open_command'"
-      $open_command
-    fi
+#     if [ ! -z "$open_command" ]; then
+#       open_command=${open_command/\%img/$1}
+#       open_command=${open_command/\%url/$img_url}
+#       echo "Opening '$open_command'"
+#       $open_command
+#     fi
 
   else # upload failed
     err_msg="$(echo "$response" | egrep -o "<message>.*</message>" | cut -d ">" -f 2 | cut -d "<" -f 1)"
