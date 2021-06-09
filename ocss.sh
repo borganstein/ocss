@@ -101,12 +101,14 @@ upload_image() {
   echo "Uploading '${1}'..."
   file_basename="$(basename $1)"
   curl --connect-timeout "$upload_connect_timeout" -m "$upload_timeout" --retry "$upload_retries" --insecure --user "$username:$password" -T "$1" "$oc_base/remote.php/webdav/$oc_ocss_dir_name/$file_basename"
-  response="$(curl --insecure --user "$username:$password" -X POST --data 'path='$oc_ocss_dir_name'/'$file_basename'&shareType=3' "$oc_base/ocs/v1.php/apps/files_sharing/api/v1/shares")"
+  # added v2 api + requirement for OCS-APIRequest: true
+  response="$(curl --header "OCS-APIRequest: true" --user "$username:$password" -X POST --data 'path='$oc_ocss_dir_name'/'$file_basename'&shareType=3' "$oc_base/ocs/v2.php/apps/files_sharing/api/v1/shares")"
 
   # response contains <status>ok</status> when successful
   if (echo "$response" | grep -q "<status>ok</status>"); then
     # cutting the url from the xml response
-    img_url="$(echo "$response" | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1 | sed -e "s/\&amp;/\&/")"
+    # added /preview to get rid of nextcloud frame
+    img_url="$(echo "$response" | egrep -o "<url>.*</url>" | cut -d ">" -f 2 | cut -d "<" -f 1 | sed -e "s/\&amp;/\&/")/preview"
     echo "image link: $img_url"
 
     if [ "$copy_url" = "true" ]; then
